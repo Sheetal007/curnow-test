@@ -67,7 +67,7 @@ Request headers
 | Yes      	| Content-Type     	| application/json 	|
 
 
-Insert data
+## Insert data
 
 URL = http://localhost:8765/api/contact
 
@@ -91,13 +91,13 @@ data =
 	}
 
 
-Get record by ID
+## Get record by ID
 
 URL = http://localhost:8765/api/contact/{record_id_here}
 Method = get
 
 
-Update record in Contact table
+## Update record in Contact table
 
 URL = http://localhost:8765/api/contact/{record_id_here}
 
@@ -121,13 +121,13 @@ data =
 	}
 
 
-Delete record by ID
+## Delete record by ID
 
 URL = http://localhost:8765/api/contact/{record_id_here}
 Method = DELETE
 
 
-Get record's
+## Get record's
 
 URL = http://localhost:8765/api/contact?page=1
 Method = GET
