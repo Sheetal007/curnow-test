@@ -6,6 +6,9 @@ namespace App\Controller;
 use Cake\Core\Configure;
 use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
+use Cake\Network\Exception\BadRequestException;
+use Cake\Network\Exception\MethodNotAllowedException;
+use Cake\Network\Exception\InvalidCsrfTokenException;
 use App\Model\Table\ContactsTable;
 use Cake\View\Exception\MissingTemplateException;
 use Cake\Validation\Validator;
@@ -47,8 +50,8 @@ class ContactController extends AppController
 	
 		$this->return['message']='Contacts';
 		$this->return['body']=(object)$contact;
-		$this->return['code']='202';
-		$this->_json($this->return);
+		$this->return['code']='200';
+		echo $this->_json($this->return); exit;
     }
 
     public function view($id)
@@ -59,13 +62,13 @@ class ContactController extends AppController
         $contact = $this->Contacts->get($id);
         $this->return['message']='Contact';
 		$this->return['body']=(object)$contact;
-		$this->return['code']='202';
-		$this->_json($this->return);
+		$this->return['code']='200';
+		echo $this->_json($this->return); exit; 
 		} else {
         $this->return['message']='Record Not Found';
 		$this->return['body']=(object)[];
 		$this->return['code']='404';
-		$this->_json($this->return);
+		echo $this->_json($this->return); exit; 
         }
     }
 
@@ -84,7 +87,7 @@ class ContactController extends AppController
 			$this->return['message']='Validation Error';
 		$this->return['body']=(object) $check;
 		$this->return['code']='400';
-		$this->_json($this->return); 
+		echo $this->_json($this->return); exit;  
 			 
 		 }
 		 
@@ -93,13 +96,13 @@ class ContactController extends AppController
         if ($this->Contacts->save($contact)) {
         $this->return['message']='Contact Added Successfully';
 		$this->return['body']=(object) $contact;
-		$this->return['code']='202';
-		$this->_json($this->return);
+		$this->return['code']='200';
+		echo $this->_json($this->return); exit; 
         } else {
         $this->return['message']='Invalid Data';
 		$this->return['body']=(object)[];
 		$this->return['code']='400';
-		$this->_json($this->return);
+		echo $this->_json($this->return); exit; 
         }
 		
 			  
@@ -119,7 +122,7 @@ class ContactController extends AppController
 			$this->return['message']='Validation Error';
 		$this->return['body']=(object) $check;
 		$this->return['code']='400';
-		$this->_json($this->return); 
+		echo $this->_json($this->return); exit;  
 			 
 		 }
 		 
@@ -127,7 +130,7 @@ class ContactController extends AppController
         $this->return['message']='Record Not Found';
 		$this->return['body']=(object)[];
 		$this->return['code']='404';
-		$this->_json($this->return);
+		echo $this->_json($this->return); exit; 
 		} 
 			
 			
@@ -140,13 +143,13 @@ class ContactController extends AppController
 		if ($this->Contacts->save($contact)) {
          $this->return['message']='Contact Updated Successfully';
 		$this->return['body']=(object) $contact;
-		$this->return['code']='202';
-		$this->_json($this->return);
+		$this->return['code']='200';
+		echo $this->_json($this->return); exit; 
         } else {
         $this->return['message']='Invalid Data';
 		$this->return['body']=(object)[];
 		$this->return['code']='400';
-		$this->_json($this->return);
+		echo $this->_json($this->return); exit; 
         }
     }
 
@@ -154,23 +157,21 @@ class ContactController extends AppController
     {
         $this->request->allowMethod(['delete']);
 		$this->loadModel('Contacts');
-        //$contact = $this->Contacts->get($id);
 		
 		$Record = $this->Contacts->find()->where(['id' => $id])->first();
-        $message = 'Deleted';
-        
 		
-		
-		if ($Record && $this->Contacts->delete($contact)) {
+		if ($Record) {
+		$contact = $this->Contacts->get($id);
+		$this->Contacts->delete($contact);
         $this->return['message']='Contacts Deleted Successfully';
 		$this->return['body']=(object)[];
-		$this->return['code']='202';
-		$this->_json($this->return);
+		$this->return['code']='200';
+		echo $this->_json($this->return); exit; 
         } else {
         $this->return['message']='Record Not Found';
 		$this->return['body']=(object)[];
 		$this->return['code']='404';
-		$this->_json($this->return);
+		echo $this->_json($this->return); exit; 
         }
 		
     }
@@ -178,19 +179,18 @@ class ContactController extends AppController
   public function _json($body, $message = '') {
    $this->_code = isset($body['code']) && $body['code'] ? $body['code'] : 200;
    header("message:" . $body['message']);
-   @$this->_set_headers();
+   @$this->_set_headers($body['code']);
    if (strlen(trim($message))) {
        $body['message'] = $message;
    }
-   echo json_encode($body);
-   die();
-}
-	private function _set_headers() {
-	   //pr($this->get_status_message()); die;
-	   header("HTTP/1.1 " . $this->_code . " " . $this->get_status_message());
+   return json_encode($body); 
+  }
+	private function _set_headers($code) {
+	   header('Content-Type: application/json');
+	   header("HTTP/1.1 " . $this->_code . " " . $this->get_status_message($code));
 	}
 	
-	private function get_status_message() {
+	private function get_status_message($code) {
    $status = array(
        100 => 'Continue',
        101 => 'Switching Protocols',
@@ -233,7 +233,7 @@ class ContactController extends AppController
        503 => 'Service Unavailable',
        504 => 'Gateway Timeout',
        505 => 'HTTP Version Not Supported');
-   return (isset($this->_html_response_code['code']) && strlen(trim($this->_html_response_code['code'])) && isset($status[$this->_html_response_code['code']])) ? $status[$this->_html_response_code['code']] : $status[500];
+   return (isset($this->_html_response_code['code']) && strlen(trim($this->_html_response_code['code'])) && isset($status[$this->_html_response_code['code']])) ? $status[$this->_html_response_code['code']] : $status[$code];
 }
 
 	public function validation($data, $type) {
@@ -245,8 +245,6 @@ class ContactController extends AppController
 			} 
 			$validator->notEmptyString($field, "We need {$value}.");
 			
-         //$validator->notEmpty('email', 'We need username.')->add(
-          //  'email', 'validFormat', ['rule' => 'email','message' => 'E-mail must be valid']);
 		}
 		$validator->notEmptyString('email', 'We need email.')->add(
           'email', 'validFormat', ['rule' => 'email','message' => 'E-mail must be valid']);
