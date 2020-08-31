@@ -94,6 +94,7 @@ data =
 ## Get record by ID
 
 URL = http://localhost:8765/api/contact/{record_id_here}
+
 Method = get
 
 
@@ -124,12 +125,14 @@ data =
 ## Delete record by ID
 
 URL = http://localhost:8765/api/contact/{record_id_here}
+
 Method = DELETE
 
 
 ## Get record's
 
 URL = http://localhost:8765/api/contact?page=1
+
 Method = GET
 
 ----------
