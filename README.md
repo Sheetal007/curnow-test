@@ -10,7 +10,7 @@ Clone the repository
 
 Switch to the repo folder
 
-    cd crud-contact
+    cd curnow-test
 
 Install all the dependencies using composer
 
@@ -70,8 +70,11 @@ Request headers
 Insert data
 
 URL = http://localhost:8765/api/contact
+
 Method = POST
-data = 
+
+data =
+
 	{
 	"first_name":"test first name",
 	"last_name":"test last name",
@@ -97,8 +100,11 @@ Method = get
 Update record in Contact table
 
 URL = http://localhost:8765/api/contact/{record_id_here}
+
 Method = PUT
-data = 
+
+data =
+
 	{
 	"first_name":"test first name",
 	"last_name":"test last name",
